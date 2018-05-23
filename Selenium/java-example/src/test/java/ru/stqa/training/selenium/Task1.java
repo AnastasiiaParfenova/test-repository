@@ -19,6 +19,7 @@ public class Task1 {
     @Before
     public void start(){
         driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait = new WebDriverWait(driver, 10);
     }
 
@@ -26,7 +27,6 @@ public class Task1 {
     public void test1() {
         driver.get("http://www.google.com");
         driver.findElement(By.name("q")).sendKeys("webdriver");
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElement(By.className("sbsb_g")).click();
         wait.until(titleIs("webdriver - Поиск в Google"));
     }
@@ -53,7 +53,6 @@ public class Task1 {
         driver.findElement(By.name("text")).sendKeys("webdriver");
         driver.findElement(By.className("search2__button")).click();
         wait.until(titleIs("webdriver — Яндекс: нашлось 5 млн результатов"));
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
     @After

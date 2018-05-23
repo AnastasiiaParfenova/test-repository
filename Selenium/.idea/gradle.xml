@@ -12,6 +12,16 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="WRAPPED" />
+        <option name="externalProjectPath" value="$USER_HOME$/IdeaProjects/Selenium" />
+        <option name="gradleHome" value="$APPLICATION_HOME_DIR$/plugins/gradle/lib" />
+        <option name="modules">
+          <set>
+            <option value="$USER_HOME$/IdeaProjects/Selenium" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>

@@ -23,6 +23,7 @@ public class Task3 {
     @Before
     public void start(){
         driver = new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait = new WebDriverWait(driver, 10);
     }
 
@@ -32,7 +33,6 @@ public class Task3 {
         driver.get("http://localhost/litecart/admin/");
         driver.findElement(By.name("username")).sendKeys("admin");
         driver.findElement(By.name("password")).sendKeys("admin", Keys.ENTER);
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait.until(visibilityOf(driver.findElement(By.className("alert-success"))));
     }
 
@@ -43,7 +43,6 @@ public class Task3 {
         driver.findElement(By.name("username")).sendKeys("admin");
         driver.findElement(By.name("password")).sendKeys("admin");
         driver.findElement(By.className("btn-default")).click();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait.until(visibilityOf(driver.findElement(By.className("alert-success"))));
     }
 
@@ -53,7 +52,6 @@ public class Task3 {
         driver.get("http://localhost/litecart/admin/");
         driver.findElement(By.name("username")).sendKeys("aadmin");
         driver.findElement(By.name("password")).sendKeys("admin", Keys.ENTER);
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait.until(visibilityOf(driver.findElement(By.xpath("//*[contains(text(), 'The user could not be found in our database')]"))));
     }
 
@@ -65,7 +63,6 @@ public class Task3 {
         driver.findElement(By.name("password")).sendKeys("admin");
         driver.findElement(By.name("remember_me"));
         driver.findElement(By.className("btn-default")).click();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait.until(visibilityOf(driver.findElement(By.className("alert-success"))));
     }
 
@@ -76,9 +73,7 @@ public class Task3 {
         driver.findElement(By.name("username")).sendKeys("admin");
         driver.findElement(By.name("password")).sendKeys("admin");
         driver.findElement(By.className("btn-default")).click();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElement(By.cssSelector(".fa-sign-out.fa-lg")).click();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         assertEquals(driver.getCurrentUrl(), "http://localhost/litecart/admin/login.php");
     }
 
@@ -88,7 +83,6 @@ public class Task3 {
         driver.get("http://localhost/litecart/admin/");
         driver.findElement(By.name("username")).sendKeys("admin");
         driver.findElement(By.name("password")).sendKeys("hhh", Keys.ENTER);
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         wait.until(visibilityOf(driver.findElement(By.xpath("//*[contains(text(), 'Wrong combination of username and password or the account does not exist.')]"))));
     }
 
