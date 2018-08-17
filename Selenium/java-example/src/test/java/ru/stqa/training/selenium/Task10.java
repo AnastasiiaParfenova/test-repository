@@ -5,11 +5,63 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+
+import java.util.HashMap;
 import java.util.List;
 import static org.junit.Assert.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Task10 extends TestBase {
+
+
+    /**
+     * Поиск подстроки, заданной регулярным выражением.
+     * @param str строка для поиска.
+     * @param pattern регулярное выражение.
+     * @param groupNumber номер группы
+     * @return возвращает i-ый товар.
+     */
+    public String parseString(String str, String pattern, int groupNumber) {
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(str);
+        if (m.find()) {
+            return m.group(groupNumber);
+
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Получение значений r, g, b из строки в формате rgb.
+     * @param rgbColor в формате rgb.
+     * @return массив со значениями r, g, b.
+     */
+    public HashMap<String, Integer> parseRgbString(String rgbColor){
+        String pattern = "rgba*\\((.*)\\)";
+        String str = parseString(rgbColor, pattern, 1);
+        String[] colorsMass = str.split(", ");
+        HashMap<String, Integer> colors = new HashMap<>();
+        colors.put("r", Integer.parseInt(colorsMass[0]));
+        colors.put("g", Integer.parseInt(colorsMass[1]));
+        colors.put("b", Integer.parseInt(colorsMass[2]));
+        return colors;
+    }
+
+    /**
+     * Получение размера цены из строки.
+     * @param sizeStr, строка, содержащая размер цен.
+     * @return размер цены.
+     */
+    public float parseSize(String sizeStr){
+        String pattern = "(.*)px";
+        String str = parseString(sizeStr, pattern, 1);
+        Float size = Float.parseFloat(str);
+        return size;
+    }
 
     /**
      * Поиск товара на странице.
@@ -68,7 +120,7 @@ public class Task10 extends TestBase {
         productOne.click();
         WebElement productPage = getProductPage();
         String prodName2 = getTextContent(productPage.findElement(By.tagName("h1")));
-        assertTrue(prodName1.equals(prodName2));
+        assertTrue("Названия товаров не совпадают", prodName1.equals(prodName2));
     }
 
     /**
@@ -82,7 +134,7 @@ public class Task10 extends TestBase {
         productOne.click();
         WebElement productPage = getProductPage();
         String prodPrice = getTextContent(getRegularPrice(productPage));
-        assertTrue(regPrice.equals(prodPrice));
+        assertTrue("Цены не совпадают", regPrice.equals(prodPrice));
     }
 
     /**
@@ -96,7 +148,7 @@ public class Task10 extends TestBase {
         productOne.click();
         WebElement productPage = getProductPage();
         String campPrice2 = getTextContent(getCampaignPrice(productPage));
-        assertTrue(campPrice1.equals(campPrice2));
+        assertTrue("Акционные цены не совпадают", campPrice1.equals(campPrice2));
     }
 
     /**
@@ -108,10 +160,11 @@ public class Task10 extends TestBase {
         WebElement productOne = getProduct(0);
         WebElement price = getRegularPrice(productOne);
         String priceColor = price.getCssValue("color");
-        if (driver instanceof FirefoxDriver){
-            assertEquals("rgb(51, 51, 51)", priceColor);
-        }
-        else assertEquals("rgba(51, 51, 51, 1)", priceColor);
+        HashMap<String, Integer> colors = parseRgbString(priceColor);
+        int r = colors.get("r");
+        int g = colors.get("g");
+        int b = colors.get("b");
+        assertTrue("Цена не серая",(r == g ) && (g == b) && (r > 0));
     }
 
     /**
@@ -122,9 +175,12 @@ public class Task10 extends TestBase {
         driver.get("http://localhost/litecart/en/");
         WebElement productOne = getProduct(0);
         WebElement price = getRegularPrice(productOne);
-        String priceTagName = price.getTagName();
-        assertEquals("s", priceTagName);
-    }
+        String priceStyle = price.getCssValue("text-decoration-line");
+        String priceStyleIE = price.getCssValue("text-decoration");
+        if (driver instanceof InternetExplorerDriver)
+            assertEquals("Цена не зачеркнутая", "line-through", priceStyleIE);
+        else assertEquals("Цена не зачеркнутая", "line-through", priceStyle);
+           }
 
     /**
      * Проверяет, что на главной странице акционная цена красная
@@ -135,10 +191,10 @@ public class Task10 extends TestBase {
         WebElement productOne = getProduct(0);
         WebElement campPrice = getCampaignPrice(productOne);
         String CampPriceColor = campPrice.getCssValue("color");
-        if (driver instanceof FirefoxDriver){
-            assertEquals("rgb(204, 0, 0)", CampPriceColor);
-        }
-        else assertEquals("rgba(204, 0, 0, 1)", CampPriceColor);
+        HashMap<String, Integer> colors = parseRgbString(CampPriceColor);
+        int g = colors.get("g");
+        int b = colors.get("b");
+        assertTrue("Цена не красная",(g == 0 ) && (b == 0));
     }
 
     /**
@@ -149,8 +205,8 @@ public class Task10 extends TestBase {
         driver.get("http://localhost/litecart/en/");
         WebElement productOne = getProduct(0);
         WebElement campPrice = getCampaignPrice(productOne);
-        String campPriceTagName = campPrice.getTagName();
-        assertEquals("strong", campPriceTagName);
+        String campPriceWeight = campPrice.getCssValue("font-weight");
+        assertEquals("Акционная цена не жирная", "700", campPriceWeight);
     }
 
     /**
@@ -162,9 +218,11 @@ public class Task10 extends TestBase {
         WebElement productOne = getProduct(0);
         WebElement price = getRegularPrice(productOne);
         WebElement campPrice = getCampaignPrice(productOne);
-        Dimension size = price.getSize();
-        Dimension campSize = campPrice.getSize();
-        assertTrue(campSize.getHeight() > size.getHeight() & campSize.getWidth() > size.getWidth());
+        String priceStyle = price.getCssValue("font-size");
+        String campPriceStyle = campPrice.getCssValue("font-size");
+        float priceSize = parseSize(priceStyle);
+        float campPriceSize = parseSize(campPriceStyle);
+        assertTrue("Акционная цена не крупнее, чем обычная", campPriceSize - priceSize > 0);
     }
 
     /**
@@ -178,10 +236,11 @@ public class Task10 extends TestBase {
         WebElement productPage = getProductPage();
         WebElement price = getRegularPrice(productPage);
         String priceColor = price.getCssValue("color");
-        if (driver instanceof FirefoxDriver){
-            assertEquals("rgb(51, 51, 51)", priceColor);
-        }
-        else assertEquals("rgba(51, 51, 51, 1)", priceColor);
+        HashMap<String, Integer> colors = parseRgbString(priceColor);
+        int r = colors.get("r");
+        int g = colors.get("g");
+        int b = colors.get("b");
+        assertTrue("Цена не серая", (r == g ) && (g == b) && (r > 0));
     }
 
     /**
@@ -194,8 +253,11 @@ public class Task10 extends TestBase {
         productOne.click();
         WebElement productPage = getProductPage();
         WebElement price = getRegularPrice(productPage);
-        String priceTagName = price.getTagName();
-        assertEquals("del", priceTagName);
+        String priceStyle = price.getCssValue("text-decoration-line");
+        String priceStyleIE = price.getCssValue("text-decoration");
+        if (driver instanceof InternetExplorerDriver)
+            assertEquals("Цена не зачеркнутая", "line-through", priceStyleIE);
+        else assertEquals("Цена не зачеркнутая", "line-through", priceStyle);
     }
 
     /**
@@ -209,10 +271,10 @@ public class Task10 extends TestBase {
         WebElement productPage = getProductPage();
         WebElement campPrice = getCampaignPrice(productPage);
         String CampPriceColor = campPrice.getCssValue("color");
-        if (driver instanceof FirefoxDriver){
-            assertEquals("rgb(204, 0, 0)", CampPriceColor);
-        }
-        else assertEquals("rgba(204, 0, 0, 1)", CampPriceColor);
+        HashMap<String, Integer> colors = parseRgbString(CampPriceColor);
+        int g = colors.get("g");
+        int b = colors.get("b");
+        assertTrue("Цена не красная",(g == 0 ) && (b == 0));
     }
 
     /**
@@ -225,8 +287,8 @@ public class Task10 extends TestBase {
         productOne.click();
         WebElement productPage = getProductPage();
         WebElement campPrice = getCampaignPrice(productPage);
-        String campPriceTagName = campPrice.getTagName();
-        assertEquals("strong", campPriceTagName);
+        String campPriceWeight = campPrice.getCssValue("font-weight");
+        assertEquals("Цена не жирная", "700", campPriceWeight);
     }
 
     /**
@@ -240,8 +302,10 @@ public class Task10 extends TestBase {
         WebElement productPage = getProductPage();
         WebElement price = getRegularPrice(productPage);
         WebElement campPrice = getCampaignPrice(productPage);
-        Dimension size = price.getSize();
-        Dimension campSize = campPrice.getSize();
-        assertTrue(campSize.getHeight() > size.getHeight() & campSize.getWidth() > size.getWidth());
+        String priceStyle = price.getCssValue("font-size");
+        String campPriceStyle = campPrice.getCssValue("font-size");
+        float priceSize = parseSize(priceStyle);
+        float campPriceSize = parseSize(campPriceStyle);
+        assertTrue("Акционная цена не крупнее, чем обычная",campPriceSize - priceSize > 0);
     }
 }
