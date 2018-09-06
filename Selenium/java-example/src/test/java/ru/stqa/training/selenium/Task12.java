@@ -13,6 +13,7 @@ import org.openqa.selenium.interactions.Actions;
 import static org.junit.Assert.*;
 import java.awt.datatransfer.*;
 import java.awt.Toolkit;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 
 public class Task12 extends TestBase {
@@ -146,6 +147,16 @@ public class Task12 extends TestBase {
     }
 
     /**
+     * Отмечает чекбокс с заданным именем и значением
+     * @param name имя
+     * @param value значение
+     */
+    public void setInput(String name, String value){
+        String script = "$('input[value=\"" +value+ "\"][name=\"" +name+ "\"]').prop('checked', true)";
+        ((JavascriptExecutor) driver).executeScript(script);
+    }
+
+    /**
      * Добавление нового тавара с заданным названием
      * @param uniqName название товара
      */
@@ -156,12 +167,9 @@ public class Task12 extends TestBase {
 
             WebElement searchContext1 = driver.findElement(By.id("tab-general"));
 
-            List<WebElement> formGroup = searchContext1.findElements(By.cssSelector(".form-group"));
-            WebElement buttonEnabled = formGroup.get(0).findElement(By.cssSelector(".btn.btn-default"));
-            buttonEnabled.click();
-
-            List<WebElement> checkbox = formGroup.get(3).findElements(By.cssSelector(".checkbox"));
-            checkbox.get(0).findElement(By.cssSelector("label")).click();
+            setInput("status", "1");
+            setInput("categories[]", "1");
+            setInput("product_groups[]", "1-3");
 
             setField(searchContext1, "date_valid_from", "01.01.2011");
             setField(searchContext1, "date_valid_to", "02.02.2022");
@@ -186,8 +194,11 @@ public class Task12 extends TestBase {
             String pathToImage = image.getAbsolutePath();
             setField(searchContext1, "new_images[]", pathToImage);
 
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+
+            // Переход на вкладку Information
             driver.findElement(By.linkText("Information")).click();
-            WebElement searchContext2 = driver.findElement(By.id("tab-information"));
+            WebElement searchContext2 = wait.until((driver) -> driver.findElement(By.id("tab-information")));
 
             setSelect(searchContext2, "manufacturer_id", "1");
             setSelect(searchContext2, "supplier_id", "");
@@ -197,8 +208,9 @@ public class Task12 extends TestBase {
             setInputField(searchContext2, "attributes[en]", "Test3");
             writeDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse sollicitudin ante massa, eget ornare libero porta congue. Cras scelerisque dui non consequat sollicitudin. Sed pretium tortor ac auctor molestie. Nulla facilisi. Maecenas pulvinar nibh vitae lectus vehicula semper. Donec et aliquet velit. Curabitur non ullamcorper mauris. In hac habitasse platea dictumst. Phasellus ut pretium justo, sit amet bibendum urna. Maecenas sit amet arcu pulvinar, facilisis quam at, viverra nisi. Morbi sit amet adipiscing ante. Integer imperdiet volutpat ante, sed venenatis urna volutpat a. Proin justo massa, convallis vitae consectetur sit amet, facilisis id libero.  ");
 
+            // Переход на вкладку Prices
             driver.findElement(By.linkText("Prices")).click();
-            WebElement searchContext3 = driver.findElement(By.id("tab-prices"));
+            WebElement searchContext3 = wait.until((driver) -> driver.findElement(By.id("tab-prices")));
             setInputField(searchContext3, "purchase_price", "1.2345");
             setSelect(searchContext3, "purchase_price_currency_code", "EUR");
             setInputField(searchContext3, "prices[USD]", "1.2334");
@@ -212,7 +224,7 @@ public class Task12 extends TestBase {
     }
 
     /**
-     * Добавление нового тавара с заданным названием и проверка, что он появился а каталоге
+     * Добавление нового товара с заданным названием и проверка, что он появился а каталоге
      */
     @Test
     public void Test() {
