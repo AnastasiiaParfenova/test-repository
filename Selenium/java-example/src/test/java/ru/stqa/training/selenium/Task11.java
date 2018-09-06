@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 import java.util.*;
 import java.lang.String;
 
@@ -92,6 +94,47 @@ public class Task11 extends TestBase {
     }
 
     /**
+     * Логин в панели администрирования
+     */
+    public void adminLogin(){
+        try {
+            driver.findElement(By.name("username")).sendKeys("admin");
+            driver.findElement(By.name("password")).sendKeys("admin", Keys.ENTER);
+        }
+        catch (NoSuchElementException e){
+            System.out.println(e.toString());
+        }
+    }
+
+    /**
+     * Отмечает чекбокс с заданным именем и значением
+     * @param name имя
+     * @param value значение
+     */
+    public void setInput(String name, String value){
+        String script = "$('input[value=\"" +value+ "\"][name=\"" +name+ "\"]').prop('checked', true)";
+        ((JavascriptExecutor) driver).executeScript(script);
+    }
+
+
+    /**
+     * Отключение капчи
+     */
+    public void disabledCaptcha(){
+        try {
+            driver.get("http://localhost/litecart/admin/?app=settings&doc=security&setting_group_key=store_info&page=1&key=captcha_enabled&action=edit");
+            adminLogin();
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            WebElement saveButton = wait.until((driver) -> driver.findElement(By.name("save")));
+            setInput("value", "0");
+            saveButton.click();
+        }
+        catch (TimeoutException e){
+            System.out.println("Кнопка Save не найдена");
+        }
+    }
+
+    /**
      * Создание новой учётной записи
      * @param email адрес электронной почты
      * @param password пароль
@@ -134,6 +177,7 @@ public class Task11 extends TestBase {
         String email = generateEmail();
         String password = generatePassword();
 
+        disabledCaptcha();
         createAccount(email, password);
         logout();
         login(email, password);
